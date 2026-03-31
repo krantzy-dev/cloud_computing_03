@@ -45,5 +45,15 @@ def get_one(recipe_id: int):
 
 
 # POST: create new recipe, assign ID from next_id; return 409 if a recipe with the same name already exists
+@router.post("/", response_model=Recipe)
+def write_recipe(recipe: RecipeCreate):
+    global recipes_db, next_id
+    if any(r.name == recipe.name for r in recipes_db):
+        raise HTTPException(status_code=409, detail="a recipe with this name already exists")
+    insert_recipe = Recipe(id=next_id,**recipe.dict())
+    recipes_db.append(insert_recipe)
+    next_id += 1
+    return insert_recipe
+
 # PUT: replace a recipe entirely by ID; return 404 if not found
 # DELETE: remove a recipe by ID; return 404 if not found, 204 with no body on success
